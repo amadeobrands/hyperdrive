@@ -258,9 +258,9 @@ func (p *Process) startRound(round block.Round) {
 }
 
 func (p *Process) handlePropose(propose *Propose) {
-	p.syncLatestCommit(propose.latestCommit)
-
 	p.logger.Debugf("received propose at height=%v and round=%v", propose.height, propose.round)
+
+	p.syncLatestCommit(propose.latestCommit)
 	n, firstTime, _, _, _ := p.state.Proposals.Insert(propose)
 
 	// upon Propose{currentHeight, currentRound, block, -1}
@@ -290,8 +290,14 @@ func (p *Process) handlePropose(propose *Propose) {
 				}
 				p.state.CurrentStep = StepPrevote
 				p.broadcaster.Broadcast(prevote)
+			} else {
+				p.logger.Debugf("current step is %v, expected propose (%v)", StepPropose)
 			}
+		} else {
+			p.logger.Debugf("current proposer is %v, expected %v", propose.Signatory().String(), p.scheduler.Schedule(p.state.CurrentHeight, p.state.CurrentRound).String())
 		}
+	} else {
+		p.logger.Debugf("expected %v == %v, %v == %v and %v == %v", propose.Height(), p.state.CurrentHeight, propose.Round(), p.state.CurrentRound, propose.ValidRound(), block.InvalidRound)
 	}
 
 	// upon f+1 *{currentHeight, round, *, *} and round > currentRound
