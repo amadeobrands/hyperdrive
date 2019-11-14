@@ -291,7 +291,7 @@ func (p *Process) handlePropose(propose *Propose) {
 				p.state.CurrentStep = StepPrevote
 				p.broadcaster.Broadcast(prevote)
 			} else {
-				p.logger.Debugf("current step is %v, expected propose (%v)", StepPropose)
+				p.logger.Debugf("current step is %v, expected propose (%v)", p.state.CurrentStep, StepPropose)
 			}
 		} else {
 			p.logger.Debugf("current proposer is %v, expected %v", propose.Signatory().String(), p.scheduler.Schedule(p.state.CurrentHeight, p.state.CurrentRound).String())
